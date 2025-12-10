@@ -44,7 +44,7 @@ class GameEngine:
         # Force 2 Summon Crests, 1 Movement, 1 Attack - JUST FOR TESTING
         results = {
             DieFace.SUMMON: 2,
-            DieFace.MOVEMENT: 1,
+            DieFace.MOVEMENT: 10,
             DieFace.ATTACK: 1
         }
         self.add_crests(self.current_player_id, results)

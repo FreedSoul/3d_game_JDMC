@@ -10,7 +10,8 @@ class ActionLog(Entity):
             model='quad',
             color=color.black66,
             scale=(0.5, 0.3),
-            position=(0.6, 0.35)
+            position=(0.6, 0.35),
+            z=1  # Push to back
         )
         
         # Title
@@ -19,7 +20,8 @@ class ActionLog(Entity):
             text="Combat Log",
             position=(0.38, 0.48),
             scale=1.0,
-            color=color.orange
+            color=color.orange,
+            z=-1 # Pull to front
         )
         
         # Log Text Content
@@ -29,13 +31,17 @@ class ActionLog(Entity):
             position=(0.36, 0.45), # Start below title
             scale=0.8,
             color=color.white,
-            origin=(-0.5, 0.5) # Top-Left anchor
+            origin=(-0.5, 0.5), # Top-Left anchor
+            z=-1 # Pull to front
         )
         
         self.messages = []
         self.max_messages = 6
         
+        self.log("Action Log Ready")
+        
     def log(self, message: str):
+        print(f"DEBUG UI LOG: {message}")
         self.messages.append(message)
         if len(self.messages) > self.max_messages:
             self.messages.pop(0) # Remove oldest

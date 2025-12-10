@@ -60,6 +60,7 @@ class BoardView(Entity):
         # Movement / Selection Logic
         cell_data = self.engine.grid.get_cell(x, y)
         current_player = self.engine.get_current_player()
+        print(f"DEBUG: Checking Selection... Cell Owner: {cell_data.monster_owner_id}, Current Player: {current_player.player_id}")
         
         # 1. Select Unit (Own Monster)
         if cell_data and cell_data.monster_id and cell_data.monster_owner_id == current_player.player_id:
@@ -76,7 +77,9 @@ class BoardView(Entity):
             return
 
         # 2. Action (Move or Attack)
+        print(f"DEBUG: Checking Action. Selected: {getattr(self, 'selected_monster_pos', None)}")
         if hasattr(self, 'selected_monster_pos') and self.selected_monster_pos:
+            print("DEBUG: Inside Action Block")
             sx, sy = self.selected_monster_pos
             
             # A. Attack?
@@ -100,6 +103,22 @@ class BoardView(Entity):
                     self.selected_monster_pos = None
                     self.clear_highlights()
                     return
+
+            # B. Move?
+            if (x, y) in self.valid_moves:
+                print(f"Moving to {x}, {y}")
+                success = self.engine.execute_move(sx, sy, x, y)
+                if success:
+                    self.selected_monster_pos = None
+                    self.valid_moves = []
+                    self.clear_highlights()
+                    self.update_visuals()
+                else:
+                    print("Move failed (cost issue?)")
+            else:
+                print("Invalid Move Destination or Action")
+                self.selected_monster_pos = None
+                self.clear_highlights()
 
     def create_grid(self):
         # Create the 13x19 grid
@@ -213,92 +232,7 @@ class BoardView(Entity):
             destroy(e)
         self.ghost_entities.clear()
 
-    def try_place(self, origin_x, origin_y):
-        if self.engine.grid.validate_dimension(
-            self.engine.current_player_id, 
-            self.current_pattern, 
-            origin_x, 
-            origin_y, 
-            self.current_rotation
-        ):
-            # Apply to Core
-            self.engine.grid.apply_dimension(
-                self.engine.current_player_id, 
-                self.current_pattern, 
-                origin_x, 
-                origin_y, 
-                self.current_rotation
-            )
-            
-            # Spawn a placeholder monster for testing immediately after placing!
-            # The pattern center is at (0,0) relative to origin, which is usually the monster pos.
-            self.engine.summon_monster(self.engine.current_player_id, "TestMonster", origin_x, origin_y)
-            
-            # Finish placement
-            self.is_placing = False
-            self.clear_ghost()
-            self.update_visuals()
-            print("Placement Successful!")
-        else:
-            print("Invalid Placement!")
 
-    def on_cell_click(self, x, y):
-        print(f"Clicked cell: {x}, {y}")
-        
-        # Movement / Selection Logic
-        cell_data = self.engine.grid.get_cell(x, y)
-        current_player = self.engine.get_current_player()
-        
-        # 1. Select Unit (Own Monster)
-        if cell_data and cell_data.monster_id and cell_data.monster_owner_id == current_player.player_id:
-            print(f"Selected Monster at {x}, {y}")
-            self.selected_monster_pos = (x, y)
-            
-            # Highlight valid moves
-            from src.core.dataclasses import DieFace
-            move_power = current_player.crests.get(DieFace.MOVEMENT, 0)
-            
-            self.valid_moves = self.engine.grid.get_valid_moves(x, y, move_power, current_player.player_id)
-            print(f"Valid Moves: {self.valid_moves}")
-            self.highlight_valid_moves()
-            return
-
-        # 2. Action (Move or Attack)
-        if hasattr(self, 'selected_monster_pos') and self.selected_monster_pos:
-            sx, sy = self.selected_monster_pos
-            
-            # A. Attack?
-            if cell_data.monster_id and cell_data.monster_owner_id != current_player.player_id:
-                # Check Adjacency
-                dist = abs(sx - x) + abs(sy - y)
-                if dist == 1:
-                    print(f"Attempting to attack {x}, {y}...")
-                    success = self.engine.execute_attack(sx, sy, x, y)
-                    if success:
-                        print("Attack Successful!")
-                        self.update_visuals()
-                    else:
-                        print("Attack Failed (No Crests?)")
-                    # Deselect after attack attempt
-                    self.selected_monster_pos = None
-                    self.clear_highlights()
-                    return
-
-            # B. Move?
-            if (x, y) in self.valid_moves:
-                print(f"Moving to {x}, {y}")
-                success = self.engine.execute_move(sx, sy, x, y)
-                if success:
-                    self.selected_monster_pos = None
-                    self.valid_moves = []
-                    self.clear_highlights()
-                    self.update_visuals()
-                else:
-                    print("Move failed (cost issue?)")
-            else:
-                print("Invalid Move Destination or Action")
-                self.selected_monster_pos = None
-                self.clear_highlights()
 
     def highlight_valid_moves(self):
         self.clear_highlights()
