@@ -4,9 +4,10 @@ from src.core.constants import BOARD_WIDTH, BOARD_HEIGHT
 from src.core.dataclasses import Pattern
 
 class BoardView(Entity):
-    def __init__(self, engine: GameEngine):
+    def __init__(self, engine: GameEngine, action_log):
         super().__init__()
         self.engine = engine
+        self.action_log = action_log
         self.cells = {} # Map (x, y) -> Entity
         self.create_grid()
         self.update_visuals()
@@ -16,6 +17,89 @@ class BoardView(Entity):
         self.current_pattern: Pattern = None
         self.current_rotation = 0
         self.ghost_entities = []
+        
+        # Movement State
+        self.move_highlights = []
+
+    # ... (create_grid, input, update remain same) ...
+
+    def try_place(self, origin_x, origin_y):
+        if self.engine.grid.validate_dimension(
+            self.engine.current_player_id, 
+            self.current_pattern, 
+            origin_x, 
+            origin_y, 
+            self.current_rotation
+        ):
+            # Apply to Core
+            self.engine.grid.apply_dimension(
+                self.engine.current_player_id, 
+                self.current_pattern, 
+                origin_x, 
+                origin_y, 
+                self.current_rotation
+            )
+            
+            # Spawn a placeholder monster for testing immediately after placing!
+            self.engine.summon_monster(self.engine.current_player_id, "TestMonster", origin_x, origin_y)
+            
+            # Finish placement
+            self.is_placing = False
+            self.clear_ghost()
+            self.update_visuals()
+            
+            self.action_log.log(f"P{self.engine.current_player_id} Summoned Monster!")
+            print("Placement Successful!")
+        else:
+            self.action_log.log("Invalid Placement!")
+            print("Invalid Placement!")
+
+    def on_cell_click(self, x, y):
+        print(f"Clicked cell: {x}, {y}")
+        
+        # Movement / Selection Logic
+        cell_data = self.engine.grid.get_cell(x, y)
+        current_player = self.engine.get_current_player()
+        
+        # 1. Select Unit (Own Monster)
+        if cell_data and cell_data.monster_id and cell_data.monster_owner_id == current_player.player_id:
+            print(f"Selected Monster at {x}, {y}")
+            self.selected_monster_pos = (x, y)
+            
+            # Highlight valid moves
+            from src.core.dataclasses import DieFace
+            move_power = current_player.crests.get(DieFace.MOVEMENT, 0)
+            
+            self.valid_moves = self.engine.grid.get_valid_moves(x, y, move_power, current_player.player_id)
+            print(f"Valid Moves: {self.valid_moves}")
+            self.highlight_valid_moves()
+            return
+
+        # 2. Action (Move or Attack)
+        if hasattr(self, 'selected_monster_pos') and self.selected_monster_pos:
+            sx, sy = self.selected_monster_pos
+            
+            # A. Attack?
+            if cell_data.monster_id and cell_data.monster_owner_id != current_player.player_id:
+                # Check Adjacency
+                dist = abs(sx - x) + abs(sy - y)
+                if dist == 1:
+                    print(f"Attempting to attack {x}, {y}...")
+                    success, msg = self.engine.execute_attack(sx, sy, x, y)
+                    
+                    if msg:
+                        self.action_log.log(msg)
+                        
+                    if success:
+                        print("Attack Successful!")
+                        self.update_visuals()
+                    else:
+                        print("Attack Failed")
+                        
+                    # Deselect after attack attempt
+                    self.selected_monster_pos = None
+                    self.clear_highlights()
+                    return
 
     def create_grid(self):
         # Create the 13x19 grid
@@ -33,23 +117,31 @@ class BoardView(Entity):
                     collider='box'
                 )
                 self.cells[(x, y)] = cell
-                # cell.on_click is handled by global input or mouse.hovered_entity check
 
     def input(self, key):
-        if not self.is_placing:
-            return
+        if key == 'left mouse down':
+            hit_entity = mouse.hovered_entity
+            target_cell = None
             
-        if key == 'r':
+            # 1. Did we hit a cell directly?
+            if hit_entity in self.cells.values():
+                target_cell = hit_entity
+            # 2. Did we hit a child (like the monster sphere or highlight)?
+            elif hit_entity and hit_entity.parent in self.cells.values():
+                target_cell = hit_entity.parent
+                
+            if target_cell:
+                x = int(target_cell.x)
+                y = int(target_cell.z)
+                
+                if self.is_placing:
+                    self.try_place(x, y)
+                else:
+                    self.on_cell_click(x, y)
+                    
+        if self.is_placing and key == 'r':
             self.current_rotation = (self.current_rotation + 1) % 4
             self.refresh_ghost()
-            
-        if key == 'left mouse down':
-            if mouse.hovered_entity in self.cells.values():
-                # Get the cell coordinates
-                # We can deduce x,y from position since we mapped it 1:1
-                x = int(mouse.hovered_entity.x)
-                y = int(mouse.hovered_entity.z)
-                self.try_place(x, y)
 
     def update(self):
         if self.is_placing:
@@ -59,6 +151,14 @@ class BoardView(Entity):
                 self.highlight_ghost(x, y)
             else:
                 self.clear_ghost()
+
+    # ... (start_placement, refresh_ghost, highlight_ghost, clear_ghost, try_place remain similar, skip to save tokens if possible, but replace needs context)
+    # I will target the highlight methods specifically in a separate replacement or include them if range allows. 
+    # Since I cannot skip valid code in replacement, I will assume the previous chunks are preserved and target specific methods if I split.
+    # But I need to replace `input` which is early in file.
+    
+    # Let's do `input` and `__init__` first.
+
 
     def start_placement(self, pattern: Pattern):
         self.is_placing = True
@@ -129,6 +229,11 @@ class BoardView(Entity):
                 origin_y, 
                 self.current_rotation
             )
+            
+            # Spawn a placeholder monster for testing immediately after placing!
+            # The pattern center is at (0,0) relative to origin, which is usually the monster pos.
+            self.engine.summon_monster(self.engine.current_player_id, "TestMonster", origin_x, origin_y)
+            
             # Finish placement
             self.is_placing = False
             self.clear_ghost()
@@ -139,6 +244,81 @@ class BoardView(Entity):
 
     def on_cell_click(self, x, y):
         print(f"Clicked cell: {x}, {y}")
+        
+        # Movement / Selection Logic
+        cell_data = self.engine.grid.get_cell(x, y)
+        current_player = self.engine.get_current_player()
+        
+        # 1. Select Unit (Own Monster)
+        if cell_data and cell_data.monster_id and cell_data.monster_owner_id == current_player.player_id:
+            print(f"Selected Monster at {x}, {y}")
+            self.selected_monster_pos = (x, y)
+            
+            # Highlight valid moves
+            from src.core.dataclasses import DieFace
+            move_power = current_player.crests.get(DieFace.MOVEMENT, 0)
+            
+            self.valid_moves = self.engine.grid.get_valid_moves(x, y, move_power, current_player.player_id)
+            print(f"Valid Moves: {self.valid_moves}")
+            self.highlight_valid_moves()
+            return
+
+        # 2. Action (Move or Attack)
+        if hasattr(self, 'selected_monster_pos') and self.selected_monster_pos:
+            sx, sy = self.selected_monster_pos
+            
+            # A. Attack?
+            if cell_data.monster_id and cell_data.monster_owner_id != current_player.player_id:
+                # Check Adjacency
+                dist = abs(sx - x) + abs(sy - y)
+                if dist == 1:
+                    print(f"Attempting to attack {x}, {y}...")
+                    success = self.engine.execute_attack(sx, sy, x, y)
+                    if success:
+                        print("Attack Successful!")
+                        self.update_visuals()
+                    else:
+                        print("Attack Failed (No Crests?)")
+                    # Deselect after attack attempt
+                    self.selected_monster_pos = None
+                    self.clear_highlights()
+                    return
+
+            # B. Move?
+            if (x, y) in self.valid_moves:
+                print(f"Moving to {x}, {y}")
+                success = self.engine.execute_move(sx, sy, x, y)
+                if success:
+                    self.selected_monster_pos = None
+                    self.valid_moves = []
+                    self.clear_highlights()
+                    self.update_visuals()
+                else:
+                    print("Move failed (cost issue?)")
+            else:
+                print("Invalid Move Destination or Action")
+                self.selected_monster_pos = None
+                self.clear_highlights()
+
+    def highlight_valid_moves(self):
+        self.clear_highlights()
+        for mx, my in self.valid_moves:
+            if (mx, my) in self.cells:
+                # Create highlight indicator (small sphere or quad)
+                hl = Entity(
+                    parent=self.cells[(mx, my)],
+                    model='sphere',
+                    color=color.azure,
+                    scale=0.4,
+                    position=(0, 0.1, -0.5), # Slightly above centered
+                    always_on_top=True
+                )
+                self.move_highlights.append(hl)
+
+    def clear_highlights(self):
+        for hl in self.move_highlights:
+            destroy(hl)
+        self.move_highlights.clear()
 
     def update_visuals(self):
         # Sync visual state with engine state
@@ -148,12 +328,34 @@ class BoardView(Entity):
                 visual_cell = self.cells.get((x, y))
                 
                 if cell_data and visual_cell:
+                    # Reset base color
+                    base_color = color.gray
                     if cell_data.owner_id == 1:
-                        visual_cell.color = color.red
+                        base_color = color.red
                     elif cell_data.owner_id == 2:
-                        visual_cell.color = color.blue
-                    else:
-                        visual_cell.color = color.gray
-                    
+                        base_color = color.blue
+                        
                     if cell_data.is_dungeon_master:
-                        visual_cell.color = color.gold
+                        base_color = color.gold
+                        
+                    visual_cell.color = base_color
+                    
+                    # Monster Visuals (Simple Cube on top)
+                    # For MVP we just tint the cell darker or add a child entity if not exists
+                    # Let's interact with a child entity 'piece'
+                    if not hasattr(visual_cell, 'piece'):
+                        visual_cell.piece = None
+                        
+                    if cell_data.monster_id:
+                        if not visual_cell.piece:
+                            visual_cell.piece = Entity(parent=visual_cell, model='sphere', color=color.white, scale=0.5, position=(0,0,-0.5))
+                        
+                        # Color piece by owner
+                        if cell_data.monster_owner_id == 1:
+                            visual_cell.piece.color = color.pink
+                        else:
+                            visual_cell.piece.color = color.cyan
+                    else:
+                        if visual_cell.piece:
+                            destroy(visual_cell.piece)
+                            visual_cell.piece = None

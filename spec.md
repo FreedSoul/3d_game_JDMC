@@ -45,6 +45,7 @@ Construir una versión jugable de escritorio de "Dungeon Dice Monsters" donde do
 * **Interacción:** Clic para seleccionar, mover y atacar.
 * **HUD:** Panel con Stats y contadores de Crestas.
 * **Feedback de Combate:** Mostrar visualmente el cambio de HP (ej. barra de vida o texto flotante "-500").
+* **Control de Cámara:** Interfaz UI para mover, rotar y hacer zoom sobre el tablero, con restricciones de límites.
 
 ## 5. Fuera del Alcance (Out of Scope) para v1.0
 * Multijugador en red (Online).

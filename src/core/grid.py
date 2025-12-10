@@ -8,6 +8,7 @@ class Cell:
         self.y = y
         self.owner_id: Optional[int] = None
         self.monster_id: Optional[str] = None # ID of the monster occupying this cell
+        self.monster_owner_id: Optional[int] = None # Player ID who owns the monster
         self.is_dungeon_master: bool = False
 
 class Grid:
@@ -91,3 +92,73 @@ class Grid:
         rotated_shape = self.rotate_pattern(pattern, rotations)
         for dx, dy in rotated_shape:
             self.set_owner(origin_x + dx, origin_y + dy, player_id)
+
+    def is_walkable(self, x: int, y: int, player_id: int) -> bool:
+        """
+        A cell is walkable if:
+        1. It is within bounds.
+        2. It has an owner (is part of the dungeon).
+           NOTE: In DDM, you can walk on enemy terrain.
+        3. It is NOT occupied by an ENEMY monster.
+        """
+        cell = self.get_cell(x, y)
+        if not cell:
+            return False
+        if cell.owner_id is None:
+            return False # Not part of dungeon
+        
+        # Check occupancy
+        if cell.monster_id:
+             # TODO: Need to know if monster is friendly or enemy. 
+             # For Grid level, we might just store owner_id of the monster or need a way to look it up.
+             # For now, let's assume we can pass if it's NOT an enemy.
+             # We need to pass the monster logic or store owner in cell.
+             # Let's add 'monster_owner_id' to Cell for easier checking.
+             if cell.monster_owner_id != player_id:
+                 return False # Enemy blocks
+        
+        return True
+
+    def get_valid_moves(self, start_x: int, start_y: int, max_steps: int, player_id: int) -> List[Tuple[int, int]]:
+        """
+        Returns all reachable (x, y) coordinates within max_steps.
+        BFS implementation.
+        """
+        valid_destinations = []
+        queue = [(start_x, start_y, 0)] # (x, y, dist)
+        visited = set([(start_x, start_y)])
+        
+        while queue:
+            cx, cy, dist = queue.pop(0)
+            
+            # If we have moves left, explore neighbors
+            if dist < max_steps:
+                neighbors = [
+                    (cx+1, cy), (cx-1, cy), (cx, cy+1), (cx, cy-1)
+                ]
+                for nx, ny in neighbors:
+                    if (nx, ny) in visited:
+                        continue
+                    
+                    if self.is_walkable(nx, ny, player_id):
+                        visited.add((nx, ny))
+                        queue.append((nx, ny, dist + 1))
+                        
+                        # Can we STOP here?
+                        # Cannot stop on ANY monster (friend or foe)
+                        n_cell = self.get_cell(nx, ny)
+                        if n_cell and n_cell.monster_id is None:
+                            valid_destinations.append((nx, ny))
+                            
+        return valid_destinations
+    
+    def move_monster(self, from_x: int, from_y: int, to_x: int, to_y: int):
+        source = self.get_cell(from_x, from_y)
+        dest = self.get_cell(to_x, to_y)
+        
+        if source and dest:
+            dest.monster_id = source.monster_id
+            dest.monster_owner_id = source.monster_owner_id
+            
+            source.monster_id = None
+            source.monster_owner_id = None

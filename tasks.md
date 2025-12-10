@@ -30,5 +30,6 @@
 - [ ] **Task 4.4:** Eliminar pieza visual si HP <= 0.
 
 ## Phase 5: Polish & Packaging
-- [ ] **Task 5.1:** Implementar HUD simple (Texto en pantalla con contadores de crestas y HP).
-- [ ] **Task 5.2:** Cargar datos de 3 monstruos reales desde `data/monsters.json`.
+- [ ] **Task 5.1:** Implementar HUD simple (Texto, Botón End Turn).
+- [ ] **Task 5.2:** Implementar UI de Control de Cámara (Pan, Zoom, Rotate con límites).
+- [ ] **Task 5.3:** Cargar datos de 3 monstruos reales desde `data/monsters.json`.

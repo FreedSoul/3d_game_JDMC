@@ -72,6 +72,11 @@ Usaremos `pydantic` o `dataclasses` estándar.
   * Mapeará coordenadas `(x, y)` lógicas a posiciones `(x, z)` en el mundo 3D.
   * **Event System:** Cuando el usuario hace clic en una celda, llama a `engine.handle_click(x, y)`.
 
+### `src/ui/camera_controls.py`
+
+  * Botones en pantalla para mover la cámara (Pan/Zoom/Rotar).
+  * Lógica de restricciones (Clamping) para no perder el tablero de vista.
+
 ### `src/ui/hud.py`
 
   * Botones para acciones: "End Turn", "Roll Dice".
