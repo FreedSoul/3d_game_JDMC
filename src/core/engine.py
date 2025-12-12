@@ -1,4 +1,5 @@
 from typing import Dict
+import random
 from src.core.grid import Grid
 from src.core.dataclasses import PlayerState, DieFace
 
@@ -37,16 +38,20 @@ class GameEngine:
 
     def roll_dice(self) -> Dict[DieFace, int]:
         """
-        Simulate rolling 3 dice.
-        For MVP Phase 3, we force a specific result to test Dimensioning.
+        Simulate rolling 3 dice with real random logic.
+        Each die has 6 faces (Uniform distribution).
         """
-        # TODO: Implement real random logic later
-        # Force 2 Summon Crests, 1 Movement, 1 Attack - JUST FOR TESTING
-        results = {
-            DieFace.SUMMON: 2,
-            DieFace.MOVEMENT: 10,
-            DieFace.ATTACK: 1
-        }
+        results = {}
+        
+        # All possible faces
+        faces = list(DieFace)
+        
+        # Roll 3 dice
+        rolls = random.choices(faces, k=3)
+        
+        for roll in rolls:
+            results[roll] = results.get(roll, 0) + 1
+            
         self.add_crests(self.current_player_id, results)
         return results
 

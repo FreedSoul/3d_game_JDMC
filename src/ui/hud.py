@@ -11,14 +11,6 @@ class HUD(Entity):
         self.on_pattern_selected_callback = on_pattern_selected_callback
         self.on_end_turn_callback = on_end_turn_callback
         
-        # Text Info (Top Left)
-        self.info_text = Text(
-            text="Welcome to DDM MVP",
-            position=(-0.85, 0.45),
-            scale=1.2,
-            origin=(-0.5, 0.5), # Anchor Top-Left
-            color=color.black
-        )
         
         # Roll Button (Bottom Left)
         self.roll_button = Button(
@@ -42,20 +34,9 @@ class HUD(Entity):
         
     def roll_dice(self):
         self.on_roll_callback()
-        self.update_stats()
 
     def end_turn(self):
         self.on_end_turn_callback()
-        self.update_stats()
-
-    def update_stats(self):
-        player = self.engine.get_current_player()
-        stats = f"PLAYER {player.player_id} | Turn: {self.engine.turn_count}\n"
-        stats += "-" * 20 + "\n"
-        for face, amount in player.crests.items():
-            if amount > 0:
-                stats += f"{face.value}: {amount}\n"
-        self.info_text.text = stats
 
     def show_pattern_selection(self):
         # Clear existing buttons if any
