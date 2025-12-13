@@ -49,3 +49,7 @@ class ActionLog(Entity):
         # Rebuild text
         full_text = "\n".join(self.messages)
         self.log_text.text = full_text
+    
+    def add_message(self, message: str):
+        """Alias for log method"""
+        self.log(message)

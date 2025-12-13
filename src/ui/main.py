@@ -6,12 +6,13 @@ from src.ui.camera_controls import CameraControls
 from src.ui.action_log import ActionLog
 from src.ui.crest_counter import CrestCounter
 from src.ui.dice_roller import DiceRoller
+from src.ui.settings_panel import SettingsPanel
 from src.core.dataclasses import DieFace, Pattern
 from src.core.patterns_registry import PATTERNS
 import random
 
 def main():
-    app = Ursina(title="Dungeon Dice Monsters MVP")
+    app = Ursina()
     
     # Initialize Core Engine
     engine = GameEngine()
@@ -20,6 +21,11 @@ def main():
     action_log = ActionLog()
     crest_counter = CrestCounter(engine)
     dice_roller = DiceRoller()
+    
+    # Settings Panel with Camera Controls
+    settings_panel = SettingsPanel()
+    cam_controls = CameraControls(parent_entity=settings_panel.content_container)
+    settings_panel.add_content(cam_controls, (0.15, 0.3))
     
     # Initialize Board View
     board = BoardView(engine, action_log)
@@ -34,21 +40,15 @@ def main():
         results = engine.roll_dice()
         print(f"Rolled: {results}")
         
-        # Animate Dice
-        dice_roller.roll(results)
+        # Animate Dice with pattern selection callback and engine reference
+        dice_roller.roll(results, engine=engine, on_pattern_selected=on_pattern_selected)
         
-        # Update UI Stats
-        crest_counter.update_stats()
+        # Log the roll results
+        roll_msg = "Rolled: " + ", ".join([f"{count}x {face.value}" for face, count in results.items()])
+        action_log.add_message(roll_msg)
         
-        # If we get SUMMON crests, show pattern selection UI
-        # Check against result dict (Since engine populates it with counts)
-        # We need to verify which crest type to check.
-        # Since logic is random now, we should only open menu if Summon >= 2.
-        # But wait, logic says "Summon Level 1 monster requires 2 invocations".
-        
-        if results.get(DieFace.SUMMON, 0) >= 2:
-            print("Summons rolled! Choose a pattern.")
-            hud.show_pattern_selection()
+        # Update UI Stats with highlighting for new crests
+        crest_counter.update_stats(new_crests=results)
 
     def update_camera():
         # Board Center is roughly (6, 0, 9)
@@ -74,9 +74,6 @@ def main():
 
     # Initialize HUD with all callbacks
     hud = HUD(engine, on_roll, on_pattern_selected, on_end_turn)
-    
-    # Initialize Camera Controls
-    cam_controls = CameraControls()
     
     # Initial Camera Setup
     update_camera()
