@@ -20,6 +20,15 @@ class HUD(Entity):
             color=color.azure,
             on_click=self.roll_dice
         )
+        
+        # Summon Button (Bottom Left, next to Roll)
+        self.summon_button = Button(
+            text='Summon',
+            scale=(0.2, 0.08),
+            position=(-0.45, -0.4),
+            color=color.green,
+            on_click=self.show_summon_patterns
+        )
 
         # End Turn Button (Bottom Right)
         self.end_turn_button = Button(
@@ -34,6 +43,17 @@ class HUD(Entity):
         
     def roll_dice(self):
         self.on_roll_callback()
+    
+    def show_summon_patterns(self):
+        """Show pattern selection if enough summon crests"""
+        player = self.engine.get_current_player()
+        total_summons = player.crests.get('SUMMON', 0)
+        
+        if total_summons < 2:
+            print(f"Not enough SUMMON crests: {total_summons} < 2")
+            return
+        
+        self.show_pattern_selection()
 
     def end_turn(self):
         self.on_end_turn_callback()

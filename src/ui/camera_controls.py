@@ -7,69 +7,85 @@ class CameraControls(Entity):
         # Title
         Text(
             parent=self,
-            text="Camera",
-            position=(0, 0.6),
-            scale=1.0,
+            text="Camera Controls",
+            position=(0, 0.1),
+            scale=0.9,
             color=color.white,
-            origin=(0, 0)
+            origin=(0, 0),
+            z=-2
         )
         
         # Position Controls (arranged in cross pattern)
         base_x = 0
-        base_y = 0.4
+        base_y = -0.1
+        spacing = 0.08
+        btn_size = 0.07
         
         self.btn_up = Button(
             parent=self,
-            text='↑',
-            scale=(0.06, 0.06),
-            position=(base_x, base_y + 0.08),
-            on_click=Func(self.move_camera, 0, 0, 1)
+            text='UP',
+            scale=(btn_size, btn_size),
+            position=(base_x, base_y + spacing),
+            on_click=Func(self.move_camera, 0, 0, 1),
+            color=color.azure,
+            z=-2
         )
         self.btn_down = Button(
             parent=self,
-            text='↓',
-            scale=(0.06, 0.06),
-            position=(base_x, base_y - 0.08),
-            on_click=Func(self.move_camera, 0, 0, -1)
+            text='DN',
+            scale=(btn_size, btn_size),
+            position=(base_x, base_y - spacing),
+            on_click=Func(self.move_camera, 0, 0, -1),
+            color=color.azure,
+            z=-2
         )
         self.btn_left = Button(
             parent=self,
-            text='←',
-            scale=(0.06, 0.06),
-            position=(base_x - 0.08, base_y),
-            on_click=Func(self.move_camera, -1, 0, 0)
+            text='LT',
+            scale=(btn_size, btn_size),
+            position=(base_x - spacing, base_y),
+            on_click=Func(self.move_camera, -1, 0, 0),
+            color=color.azure,
+            z=-2
         )
         self.btn_right = Button(
             parent=self,
-            text='→',
-            scale=(0.06, 0.06),
-            position=(base_x + 0.08, base_y),
-            on_click=Func(self.move_camera, 1, 0, 0)
+            text='RT',
+            scale=(btn_size, btn_size),
+            position=(base_x + spacing, base_y),
+            on_click=Func(self.move_camera, 1, 0, 0),
+            color=color.azure,
+            z=-2
         )
         
         # Zoom Controls
         Text(
             parent=self,
             text="Zoom",
-            position=(0, 0.2),
-            scale=0.8,
+            position=(0, -0.3),
+            scale=0.7,
             color=color.white,
-            origin=(0, 0)
+            origin=(0, 0),
+            z=-2
         )
         
         self.btn_zoom_in = Button(
             parent=self,
             text='+',
-            scale=(0.08, 0.06),
-            position=(-0.05, 0.1),
-            on_click=Func(self.zoom_camera, -1)
+            scale=(0.08, 0.065),
+            position=(-0.055, -0.4),
+            on_click=Func(self.zoom_camera, -1),
+            color=color.green,
+            z=-2
         )
         self.btn_zoom_out = Button(
             parent=self,
             text='-',
-            scale=(0.08, 0.06),
-            position=(0.05, 0.1),
-            on_click=Func(self.zoom_camera, 1)
+            scale=(0.08, 0.065),
+            position=(0.055, -0.4),
+            on_click=Func(self.zoom_camera, 1),
+            color=color.red,
+            z=-2
         )
         
         self.zoom_step = 2

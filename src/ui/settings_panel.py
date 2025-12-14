@@ -13,7 +13,7 @@ class SettingsPanel(Entity):
         self.panel = Entity(
             parent=self,
             model='quad',
-            color=color.rgba(30, 30, 30, 230),
+            color=color.gray,  # Grey background
             scale=(self.panel_width, 1.8),
             position=(self.hidden_x, 0),
             z=1
@@ -37,7 +37,8 @@ class SettingsPanel(Entity):
             scale=(0.12, 0.08),
             color=color.orange,
             text_color=color.white,
-            on_click=self.toggle
+            on_click=self.toggle,
+            z=-10  # Always in front
         )
         
         # Container for settings content
@@ -46,6 +47,15 @@ class SettingsPanel(Entity):
         # State
         self.is_visible = False
         
+        # Start with panel disabled/hidden
+        self.panel.enabled = False
+        self.title.enabled = False
+        self.content_container.enabled = False
+        
+    def set_roll_button(self, button):
+        """Set reference to roll button for z-index control"""
+        self.roll_button = button
+    
     def toggle(self):
         """Toggle panel visibility with slide animation"""
         if self.is_visible:
@@ -56,6 +66,17 @@ class SettingsPanel(Entity):
     def show(self):
         """Slide panel in from left"""
         self.is_visible = True
+        
+        # Send roll button behind panel when menu unfolds
+        if hasattr(self, 'roll_button') and self.roll_button:
+            self.roll_button.z = 2  # Behind panel (panel is at z=1)
+        
+        # Enable rendering
+        self.panel.enabled = True
+        self.title.enabled = True
+        self.content_container.enabled = True
+        
+        # Animate in
         self.panel.animate_x(self.visible_x, duration=0.3, curve=curve.out_expo)
         self.title.animate_x(self.visible_x + self.panel_width/2 - 0.05, duration=0.3, curve=curve.out_expo)
         
@@ -68,6 +89,12 @@ class SettingsPanel(Entity):
     def hide(self):
         """Slide panel out to left"""
         self.is_visible = False
+        
+        # Bring roll button forward when menu folds (but still behind MENU toggle at z=-10)
+        if hasattr(self, 'roll_button') and self.roll_button:
+            self.roll_button.z = 0
+        
+        # Animate out
         self.panel.animate_x(self.hidden_x, duration=0.3, curve=curve.out_expo)
         self.title.animate_x(self.hidden_x + self.panel_width/2 - 0.05, duration=0.3, curve=curve.out_expo)
         
@@ -75,6 +102,16 @@ class SettingsPanel(Entity):
         for child in self.content_container.children:
             if hasattr(child, 'x'):
                 child.animate_x(self.hidden_x + (child.x - self.visible_x), duration=0.3, curve=curve.out_expo)
+        
+        # Disable rendering after animation completes
+        invoke(self._disable_panel, delay=0.35)
+    
+    def _disable_panel(self):
+        """Disable panel rendering when hidden"""
+        if not self.is_visible:  # Only disable if still hidden
+            self.panel.enabled = False
+            self.title.enabled = False
+            self.content_container.enabled = False
     
     def add_content(self, entity, relative_pos):
         """Add content to the panel with relative positioning"""

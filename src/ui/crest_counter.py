@@ -10,10 +10,7 @@ class CrestCounter(Entity):
         # Track previous crest values to detect changes
         self.previous_crests = {}
         
-        # Position below Action Log (which is roughly Top Right)
-        # ActionLog bg is at (0.6, 0.35) with scale (0.5, 0.3). Bottom edge ~ 0.2
-        # So we place this at y=0.0 to -0.1 range.
-        
+        # Position below Action Log
         self.bg = Entity(
             parent=self,
             model='quad',
@@ -32,7 +29,7 @@ class CrestCounter(Entity):
             z=-1
         )
         
-        # Create individual Text entities for each crest line for color control
+        # Create individual Text/Button entities for each crest line
         self.crest_texts = {}
         y_offset = 0.08
         line_height = 0.02
@@ -57,6 +54,8 @@ class CrestCounter(Entity):
         
         for i, (left_crest, right_crest) in enumerate(crest_pairs):
             y_pos = y_offset - (i + 1) * line_height
+            
+            # All crests as simple text
             self.crest_texts[left_crest] = Text(
                 parent=self,
                 text="",
@@ -66,6 +65,7 @@ class CrestCounter(Entity):
                 origin=(-0.5, 0.5),
                 z=-1
             )
+            
             self.crest_texts[right_crest] = Text(
                 parent=self,
                 text="",

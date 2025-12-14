@@ -25,23 +25,19 @@ def main():
     # Settings Panel with Camera Controls
     settings_panel = SettingsPanel()
     cam_controls = CameraControls(parent_entity=settings_panel.content_container)
-    settings_panel.add_content(cam_controls, (0.15, 0.3))
+    settings_panel.add_content(cam_controls, (0.05, 0))
     
     # Initialize Board View
     board = BoardView(engine, action_log)
+    board.crest_counter = crest_counter  # Pass reference for updates
     
     # Define callback for when a pattern is clicked in HUD
-    def on_pattern_selected(pattern_name):
-        if pattern_name in PATTERNS:
-            selected_pattern = PATTERNS[pattern_name]
-            board.start_placement(selected_pattern)
-            
     def on_roll():
         results = engine.roll_dice()
         print(f"Rolled: {results}")
         
-        # Animate Dice with pattern selection callback and engine reference
-        dice_roller.roll(results, engine=engine, on_pattern_selected=on_pattern_selected)
+        # Animate Dice (no pattern selection)
+        dice_roller.roll(results, engine=engine)
         
         # Log the roll results
         roll_msg = "Rolled: " + ", ".join([f"{count}x {face.value}" for face, count in results.items()])
@@ -49,6 +45,11 @@ def main():
         
         # Update UI Stats with highlighting for new crests
         crest_counter.update_stats(new_crests=results)
+    
+    def on_pattern_selected(pattern_name):
+        if pattern_name in PATTERNS:
+            selected_pattern = PATTERNS[pattern_name]
+            board.start_placement(selected_pattern)
 
     def update_camera():
         # Board Center is roughly (6, 0, 9)
@@ -74,6 +75,9 @@ def main():
 
     # Initialize HUD with all callbacks
     hud = HUD(engine, on_roll, on_pattern_selected, on_end_turn)
+    
+    # Connect roll button to settings panel for z-index control
+    settings_panel.set_roll_button(hud.roll_button)
     
     # Initial Camera Setup
     update_camera()

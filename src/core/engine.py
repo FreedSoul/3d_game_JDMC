@@ -54,6 +54,20 @@ class GameEngine:
             
         self.add_crests(self.current_player_id, results)
         return results
+    
+    def deduct_summon_cost(self, cost=2):
+        """Deduct summon crests from current player (default cost: 2)"""
+        player = self.get_current_player()
+        current_summons = player.crests.get('SUMMON', 0)
+        
+        if current_summons >= cost:
+            player.crests['SUMMON'] = current_summons - cost
+            print(f"Deducted {cost} SUMMON crests. Remaining: {player.crests['SUMMON']}")
+            return True
+        else:
+            print(f"Not enough SUMMON crests: {current_summons} < {cost}")
+            return False
+
 
     def summon_monster(self, player_id: int, monster_id: str, x: int, y: int):
         """
