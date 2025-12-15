@@ -96,6 +96,8 @@ class BoardView(Entity):
                     if success:
                         print("Attack Successful!")
                         self.update_visuals()
+                        if hasattr(self, 'crest_counter'):
+                            self.crest_counter.update_stats()
                     else:
                         print("Attack Failed")
                         
@@ -113,6 +115,8 @@ class BoardView(Entity):
                     self.valid_moves = []
                     self.clear_highlights()
                     self.update_visuals()
+                    if hasattr(self, 'crest_counter'):
+                        self.crest_counter.update_stats()
                 else:
                     print("Move failed (cost issue?)")
             else:

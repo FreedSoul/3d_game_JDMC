@@ -12,20 +12,20 @@ class HUD(Entity):
         self.on_end_turn_callback = on_end_turn_callback
         
         
-        # Roll Button (Bottom Left)
+        # Roll Button (Bottom Left, Top of Stack)
         self.roll_button = Button(
             text='Roll Dice',
             scale=(0.2, 0.08),
-            position=(-0.7, -0.4),
+            position=(-0.7, -0.35),
             color=color.azure,
             on_click=self.roll_dice
         )
         
-        # Summon Button (Bottom Left, next to Roll)
+        # Summon Button (Bottom Left, Bottom of Stack)
         self.summon_button = Button(
             text='Summon',
             scale=(0.2, 0.08),
-            position=(-0.45, -0.4),
+            position=(-0.7, -0.45),
             color=color.green,
             on_click=self.show_summon_patterns
         )
@@ -54,6 +54,19 @@ class HUD(Entity):
             return
         
         self.show_pattern_selection()
+
+    def update(self):
+        # Update Summon Button State
+        if self.engine:
+            player = self.engine.get_current_player()
+            total_summons = player.crests.get('SUMMON', 0)
+            
+            if total_summons >= 2:
+                self.summon_button.color = color.green
+                self.summon_button.text_color = color.white
+            else:
+                self.summon_button.color = color.gray
+                self.summon_button.text_color = color.light_gray
 
     def end_turn(self):
         self.on_end_turn_callback()

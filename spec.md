@@ -40,7 +40,17 @@ Construir una versión jugable de escritorio de "Dungeon Dice Monsters" donde do
 * **Combat Engine:** Función pura que recibe (Atacante, Defensor, Bool:DefensaPagada) y retorna el nuevo estado de HP.
 * **Turn Manager:** Control de estados y turnos.
 
-## 4. Requerimientos de UI (Ursina)
+## 4. UI/UX
+- **HUD**:
+    - "Roll Dice" and "Summon" buttons stacked vertically bottom-left.
+    - "End Turn" button bottom-right.
+    - **Monster Cards**: Row of 5 clickable cards at bottom-center.
+        - Display: Name, Level, Type, HP, Attack, Defense, Description.
+        - Interaction: Click to select monster for summoning.
+- **Crest Counter**: Displays current crest resources.
+- **Action Log**: Scrolling text log of game events.
+
+## 5. Requerimientos de UI (Ursina)
 * **Cámara:** Vista isométrica/cenital.
 * **Interacción:** Clic para seleccionar, mover y atacar.
 * **HUD:** Panel con Stats y contadores de Crestas.

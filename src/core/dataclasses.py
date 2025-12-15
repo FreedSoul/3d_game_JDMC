@@ -25,6 +25,10 @@ class Monster(BaseModel):
     atk: int
     defense: int = Field(alias="def") # 'def' is a reserved keyword
     pattern: Pattern
+    effects: List[str] = [] # List of Effect IDs
+    type: str = "Warrior" # Default type
+    description: str = ""
+    texture_path: Optional[str] = None
     
     class Config:
         populate_by_name = True

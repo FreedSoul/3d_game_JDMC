@@ -33,6 +33,22 @@ class GameEngine:
             for face, amount in crests.items():
                 player.crests[face] += amount
 
+    def remove_crests(self, player_id: int, crests: Dict[DieFace, int]) -> bool:
+        player = self.players.get(player_id)
+        if not player:
+            return False
+            
+        # 1. Check if affordable
+        for face, cost in crests.items():
+            if player.crests.get(face, 0) < cost:
+                return False
+                
+        # 2. Deduct
+        for face, cost in crests.items():
+            player.crests[face] -= cost
+            
+        return True
+
     def get_current_player(self) -> PlayerState:
         return self.players[self.current_player_id]
 
@@ -57,16 +73,14 @@ class GameEngine:
     
     def deduct_summon_cost(self, cost=2):
         """Deduct summon crests from current player (default cost: 2)"""
-        player = self.get_current_player()
-        current_summons = player.crests.get('SUMMON', 0)
-        
-        if current_summons >= cost:
-            player.crests['SUMMON'] = current_summons - cost
-            print(f"Deducted {cost} SUMMON crests. Remaining: {player.crests['SUMMON']}")
+        # Use centralized optional deduction
+        if self.remove_crests(self.current_player_id, {DieFace.SUMMON: cost}):
+            player = self.get_current_player()
+            print(f"Deducted {cost} SUMMON crests. Remaining: {player.crests[DieFace.SUMMON]}")
             return True
-        else:
-            print(f"Not enough SUMMON crests: {current_summons} < {cost}")
-            return False
+            
+        print(f"Not enough SUMMON crests.")
+        return False
 
 
     def summon_monster(self, player_id: int, monster_id: str, x: int, y: int):
@@ -90,10 +104,8 @@ class GameEngine:
         # Re-calculate simple cost (Manhattan)
         dist = abs(from_x - to_x) + abs(from_y - to_y)
         
-        if move_power < dist:
+        if not self.remove_crests(player.player_id, {DieFace.MOVEMENT: dist}):
             return False
-            
-        player.crests[DieFace.MOVEMENT] -= dist
         
         self.grid.move_monster(from_x, from_y, to_x, to_y)
         return True
@@ -115,11 +127,9 @@ class GameEngine:
 
         # Cost Check
         player = self.players.get(attacker_cell.monster_owner_id)
-        if player.crests.get(DieFace.ATTACK, 0) < 1:
+        # Cost Check & Deduction using centralized method
+        if not self.remove_crests(player.player_id, {DieFace.ATTACK: 1}):
             return False, "Not enough Attack Crests"
-            
-        # Deduct Crest
-        player.crests[DieFace.ATTACK] -= 1
         
         # Calculate Damage (MVP: Fixed 10)
         damage = 10 

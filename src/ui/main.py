@@ -27,6 +27,10 @@ def main():
     cam_controls = CameraControls(parent_entity=settings_panel.content_container)
     settings_panel.add_content(cam_controls, (0.05, 0))
     
+    # Initialize Hand View
+    from src.ui.hand_view import HandView
+    hand_view = HandView()
+    
     # Initialize Board View
     board = BoardView(engine, action_log)
     board.crest_counter = crest_counter  # Pass reference for updates
