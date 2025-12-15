@@ -23,7 +23,7 @@ class HandView(Entity):
                 defense=80, 
                 type="Rock",
                 description=description_golem,
-                texture_path="../../assets/cards/crystal_golem_1.png",
+                texture_path="../../assets/cards/crystal_golem_2.png",
                 pattern=dummy_pattern, 
                 effects=["E002_HEAL_SELF"]
             ),
@@ -47,4 +47,5 @@ class HandView(Entity):
             
     def on_card_click(self, monster):
         print(f"Card Clicked: {monster.name}")
-        # Logic to select this monster for summoning could go here
+        from src.ui.card_detail_modal import CardDetailModal
+        CardDetailModal(monster)

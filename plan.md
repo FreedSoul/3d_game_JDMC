@@ -110,15 +110,20 @@ Usaremos `pydantic` o `dataclasses` estándar.
 2.  Implementar `execute_attack()` en el engine.
 3.  Actualizar HUD con los nuevos valores de HP/Crestas.
 
-## 5\. Datos Iniciales (JSON)
+### Phase 6: Monster Cards & Advanced UI
+1. **Refactor HUD**: Vertical Stack for Action Buttons (Roll/Summon).
+2. **Effects System**:
+    - Centralized `Effects Registry` in `src/core/effects.py`.
+    - Update `Monster` dataclass with `effects` list, `type`, `description`, `texture_path` fields.
+3. **MonsterCard Component**:
+    - Visual representation with Stats, Type, Description, and Texture support.
+4. **Hand View**:
+    - Display 5 cards at the bottom center.
+    - Click interaction to select for summoning.
 
-Crearemos un `monsters.json` con 3 monstruos básicos para pruebas:
-
-  * *Knight of Twin Swords* (Nivel 1, Patrón simple).
-  * *Blast Lizard* (Nivel 2, Patrón medio).
-  * *Dark Magician* (Nivel 4, Patrón complejo).
-
-<!-- end list -->
+## 5. Initial Data (JSON) -> MVP Hardcoded
+We are currently hardcoding test monsters in `HandView` for MVP.
+- **Crystal Golem**: Level 2, Rock Type, specific stats/effect.
 
 ```
 
