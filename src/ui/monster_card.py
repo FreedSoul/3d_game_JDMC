@@ -3,7 +3,7 @@ from src.core.dataclasses import Monster
 from src.core.effects import get_effect
 
 class MonsterCard(Entity):
-    def __init__(self, monster: Monster, position=(0,0), on_click=None, **kwargs):
+    def __init__(self, monster: Monster, position=(0,0), on_click=None, on_summon_request=None, **kwargs):
         # Determine texture
         card_texture = 'white_cube'
         if monster.texture_path:
@@ -20,6 +20,18 @@ class MonsterCard(Entity):
         )
         self.monster = monster
         self.on_click_callback = on_click
+        self.on_summon_request = on_summon_request
+        
+        # --- Options Overlay ---
+        self.options_menu = Entity(parent=self, scale=1, enabled=False, z=-1)
+        self.summon_btn = Button(
+            parent=self.options_menu,
+            text="SUMMON",
+            scale=(0.8, 0.2),
+            y=0.3,
+            color=color.green,
+            on_click=self.request_summon
+        )
         
         # --- Visuals ---
         
@@ -51,11 +63,46 @@ class MonsterCard(Entity):
         # Manually breaking lines or relying on simple display.
         Text(parent=self, text=full_desc, position=(0, -0.3), origin=(0, 0), scale=0.8, color=color.light_gray)
 
+    def request_summon(self):
+        print(f"Summon Requested for {self.monster.name}")
+        if self.on_summon_request:
+            self.on_summon_request(self.monster)
+
+    def update(self):
+        # Hover Logic for Options
+        if self.hovered:
+            self.options_menu.enabled = True
+        else:
+            # Only disable if mouse is NOT over the options menu buttons
+            # But the buttons are children of self, so hovering them might count as hovering self?
+            # In Ursina, if you hover a child, you don't necessarily hover the parent collider unless it's set up that way.
+            # But wait, button has its own collider.
+            # Let's keep it simple: if mouse.hovered_entity is self or one of options.
+            if mouse.hovered_entity == self or mouse.hovered_entity in self.options_menu.children:
+                self.options_menu.enabled = True
+            else:
+                self.options_menu.enabled = False
+
     def input(self, key):
         if self.hovered and key == 'left mouse down':
-            if self.on_click_callback:
-                self.on_click_callback(self.monster)
-            
-            # Simple click visual feedback
-            self.animate_scale(self.scale * 1.1, duration=0.1)
-            invoke(self.animate_scale, self.scale, duration=0.1, delay=0.1)
+            # Check if we clicked the summon button?
+            # The button's on_click handles itself.
+            # But if we click the card background, we want details.
+            # If mouse is hovering the button, button gets click.
+            # If mouse is hovering the card but NOT the button, card gets click.
+            # Ursina input propogation... if button handles it, great.
+            if mouse.hovered_entity == self:
+                if self.on_click_callback:
+                    self.on_click_callback(self.monster)
+                
+                # Simple click visual feedback
+                self.animate_scale(self.scale * 1.1, duration=0.1)
+                invoke(self.animate_scale, self.scale, duration=0.1, delay=0.1)
+
+    def set_summonable(self, can_summon: bool):
+        if can_summon:
+            self.summon_btn.color = color.green
+            self.summon_btn.text_color = color.white
+        else:
+            self.summon_btn.color = color.gray
+            self.summon_btn.text_color = color.light_gray

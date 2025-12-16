@@ -21,15 +21,6 @@ class HUD(Entity):
             on_click=self.roll_dice
         )
         
-        # Summon Button (Bottom Left, Bottom of Stack)
-        self.summon_button = Button(
-            text='Summon',
-            scale=(0.2, 0.08),
-            position=(-0.7, -0.45),
-            color=color.green,
-            on_click=self.show_summon_patterns
-        )
-
         # End Turn Button (Bottom Right)
         self.end_turn_button = Button(
             text='End Turn',
@@ -44,8 +35,10 @@ class HUD(Entity):
     def roll_dice(self):
         self.on_roll_callback()
     
-    def show_summon_patterns(self):
+    def show_summon_patterns(self, monster=None):
         """Show pattern selection if enough summon crests"""
+        self.pending_monster = monster  # Store the monster being summoned
+        
         player = self.engine.get_current_player()
         total_summons = player.crests.get('SUMMON', 0)
         
@@ -56,17 +49,11 @@ class HUD(Entity):
         self.show_pattern_selection()
 
     def update(self):
-        # Update Summon Button State
-        if self.engine:
-            player = self.engine.get_current_player()
-            total_summons = player.crests.get('SUMMON', 0)
-            
-            if total_summons >= 2:
-                self.summon_button.color = color.green
-                self.summon_button.text_color = color.white
-            else:
-                self.summon_button.color = color.gray
-                self.summon_button.text_color = color.light_gray
+        # Update logic if needed
+        pass
+
+    def end_turn(self):
+        self.on_end_turn_callback()
 
     def end_turn(self):
         self.on_end_turn_callback()
@@ -95,6 +82,10 @@ class HUD(Entity):
         self.pattern_buttons.clear()
 
     def select_pattern(self, pattern_name):
-        print(f"HUD Selected: {pattern_name}")
-        self.on_pattern_selected_callback(pattern_name)
+        print(f"HUD Selected: {pattern_name} for {self.pending_monster.name if self.pending_monster else 'Unknown'}")
+        
+        # Pass both pattern name and the pending monster
+        self.on_pattern_selected_callback(pattern_name, self.pending_monster)
+        
         self.hide_pattern_selection()
+        self.pending_monster = None # Reset

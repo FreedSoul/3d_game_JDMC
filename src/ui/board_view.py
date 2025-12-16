@@ -4,22 +4,31 @@ from src.core.constants import BOARD_WIDTH, BOARD_HEIGHT
 from src.core.dataclasses import Pattern
 
 class BoardView(Entity):
-    def __init__(self, engine: GameEngine, action_log):
+    def __init__(self, engine: GameEngine, action_log, on_summon_success_callback=None):
         super().__init__()
         self.engine = engine
         self.action_log = action_log
-        self.cells = {} # Map (x, y) -> Entity
+        self.on_summon_success_callback = on_summon_success_callback
+        
+        self.cells = {} # (x,y) -> Entity
+        self.grid_width = 13
+        self.grid_height = 19
+        
         self.create_grid()
         self.update_visuals()
         
         # Placement State
-        self.is_placing = False
-        self.current_pattern: Pattern = None
+        self.construction_mode = False
+        self.current_pattern = None
+        self.current_pattern_shape = [] # List of tuples
         self.current_rotation = 0
         self.ghost_entities = []
+        self.pending_monster = None # Monster being summoned
         
         # Movement State
         self.move_highlights = []
+        
+        self.crest_counter = None # Will be set from main
 
     # ... (create_grid, input, update remain same) ...
 
@@ -44,12 +53,23 @@ class BoardView(Entity):
             self.engine.summon_monster(self.engine.current_player_id, "TestMonster", origin_x, origin_y)
             
             # Finish placement
-            self.is_placing = False
+            self.construction_mode = False
             self.clear_ghost()
             self.update_visuals()
             
+            # Deduct Summon Crests
+            self.engine.deduct_summon_cost(cost=2)
+            if self.crest_counter:
+                self.crest_counter.update_stats()
+            
             self.action_log.log(f"P{self.engine.current_player_id} Summoned Monster!")
             print("Placement Successful!")
+            
+            # Trigger Success Callback
+            if self.on_summon_success_callback and self.pending_monster:
+                self.on_summon_success_callback(self.pending_monster)
+            
+            self.pending_monster = None
         else:
             self.action_log.log("Invalid Placement!")
             print("Invalid Placement!")
@@ -157,17 +177,17 @@ class BoardView(Entity):
                 x = int(target_cell.x)
                 y = int(target_cell.z)
                 
-                if self.is_placing:
+                if self.construction_mode:
                     self.try_place(x, y)
                 else:
                     self.on_cell_click(x, y)
                     
-        if self.is_placing and key == 'r':
+        if self.construction_mode and key == 'r':
             self.current_rotation = (self.current_rotation + 1) % 4
             self.refresh_ghost()
 
     def update(self):
-        if self.is_placing:
+        if self.construction_mode:
             if mouse.hovered_entity and mouse.hovered_entity in self.cells.values():
                 x = int(mouse.hovered_entity.x)
                 y = int(mouse.hovered_entity.z)
@@ -183,10 +203,12 @@ class BoardView(Entity):
     # Let's do `input` and `__init__` first.
 
 
-    def start_placement(self, pattern: Pattern):
-        self.is_placing = True
+    def start_placement(self, pattern: Pattern, monster=None):
+        self.construction_mode = True
         self.current_pattern = pattern
         self.current_rotation = 0
+        self.pending_monster = monster
+        print(f"Construction Mode ON: {pattern} for {monster}")
 
     def refresh_ghost(self):
         # Triggered on rotation, re-highlight current position if mouse is hovering

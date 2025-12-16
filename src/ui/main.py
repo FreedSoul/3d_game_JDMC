@@ -29,10 +29,24 @@ def main():
     
     # Initialize Hand View
     from src.ui.hand_view import HandView
-    hand_view = HandView()
+    # Logic: Card Summon Click -> HUD.show_summon_patterns
+    # But HUD is initialized AFTER HandView. 
+    # Solution: Initialize HUD first or pass a wrapper.
+    # Let's shuffle the init order or use a lambda that references hud later? 
+    # Or better: initialize HandView after HUD.
     
+    # ... Wait, HUD needs callbacks defined in local scope.
+    # Let's move HandView init after HUD init.
+    
+    
+    # Define callback when summon succeeds
+    def on_summon_success(monster):
+        print(f"Summon Success: {monster.name if monster else 'Unknown'}")
+        if monster:
+            hand_view.remove_card(monster)
+
     # Initialize Board View
-    board = BoardView(engine, action_log)
+    board = BoardView(engine, action_log, on_summon_success_callback=on_summon_success)
     board.crest_counter = crest_counter  # Pass reference for updates
     
     # Define callback for when a pattern is clicked in HUD
@@ -50,10 +64,10 @@ def main():
         # Update UI Stats with highlighting for new crests
         crest_counter.update_stats(new_crests=results)
     
-    def on_pattern_selected(pattern_name):
+    def on_pattern_selected(pattern_name, monster=None):
         if pattern_name in PATTERNS:
             selected_pattern = PATTERNS[pattern_name]
-            board.start_placement(selected_pattern)
+            board.start_placement(selected_pattern, monster)
 
     def update_camera():
         # Board Center is roughly (6, 0, 9)
@@ -79,6 +93,10 @@ def main():
 
     # Initialize HUD with all callbacks
     hud = HUD(engine, on_roll, on_pattern_selected, on_end_turn)
+    
+    # Initialize Hand View (After HUD to access its methods)
+    from src.ui.hand_view import HandView
+    hand_view = HandView(engine=engine, on_summon_click=hud.show_summon_patterns)
     
     # Connect roll button to settings panel for z-index control
     settings_panel.set_roll_button(hud.roll_button)
