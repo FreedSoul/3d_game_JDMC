@@ -64,9 +64,10 @@ class MonsterCard(Entity):
         Text(parent=self, text=full_desc, position=(0, -0.3), origin=(0, 0), scale=0.8, color=color.light_gray)
 
     def request_summon(self):
-        print(f"Summon Requested for {self.monster.name}")
+        print(f"Summon Requested for {self.monster.name} at {self.position}")
         if self.on_summon_request:
-            self.on_summon_request(self.monster)
+            # Pass monster AND card position (Vec3, but for UI we mostly care about x, y)
+            self.on_summon_request(self.monster, self.position)
 
     def update(self):
         # Hover Logic for Options

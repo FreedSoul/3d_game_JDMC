@@ -36,9 +36,9 @@
 
 ## Phase 6: Monster Cards & Advanced UI
 - [x] **Task 6.1:** Refactor HUD: Replace Summon Button with Card Hover Options.
+    - [x] **Polish:** Replaced "Roll Dice" text with custom PNG icon.
 - [x] **Task 6.2:** Create `MonsterCard` Component: Visuals & Interactions (Hover/Click).
 - [x] **Task 6.3:** Implement Hand View: Display 5 Monster Cards.
 - [x] **Task 6.4:** Implement Effects System (`src/core/effects.py`).
 - [x] **Task 6.5:** Load Crystal Golem data and texture using relative paths.
 - [x] **Task 6.6:** Integrate Card Selection with Summoning Logic (Hover -> Summon -> Patterns).
-- [x] **Task 6.7:** Verify Summon Flow (Card Removal Debugging).
