@@ -1,0 +1,12 @@
+{
+    "name": "Ember Drake",
+    "level": 2,
+    "hp": 15,
+    "atk": 50,
+    "defense": 15,
+    "type": "Dragon",
+    "description": "A matured whelp with hotter flames.",
+    "texture_path": "../assets/cards/ember_whelp_1.png",
+    "effects": [],
+    "pattern": "RECT_2X3"
+}

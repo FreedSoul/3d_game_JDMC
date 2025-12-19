@@ -21,29 +21,12 @@ class HandView(Entity):
                     c.set_summonable(can_summon)
 
     def create_test_hand(self):
-        # Create 5 Dummy Monsters for MVP
-        dummy_pattern = Pattern(shape=[(0,0), (0,1), (0,2), (1,0), (1,1), (1,2)]) # Rect
+        from src.core.monster_loader import MonsterLoader
+        # Load monsters from data directory
+        monsters_data = MonsterLoader.load_monsters("data/monsters")
         
-        description_golem = "a formidale construct of raw crystal, its body can deflect even the strongest attacks. it slowly regenerates in contact with earth. "
-        
-        monsters_data = [
-            Monster(
-                name="Crystal Golem", 
-                level=2, 
-                hp=8, 
-                atk=30, 
-                defense=80, 
-                type="Rock",
-                description=description_golem,
-                texture_path="../../assets/cards/crystal_golem_2.png",
-                pattern=dummy_pattern, 
-                effects=["E002_HEAL_SELF"]
-            ),
-            Monster(name="Twin Swords", level=1, hp=10, atk=40, defense=10, type="Warrior", pattern=dummy_pattern, effects=["E001_DOUBLE_ATK"]),
-            Monster(name="Blast Lizard", level=2, hp=20, atk=30, defense=10, type="Reptile", pattern=dummy_pattern),
-            Monster(name="Dark Magician", level=3, hp=20, atk=50, defense=10, type="Spellcaster", pattern=dummy_pattern),
-            Monster(name="Cyber Raider", level=1, hp=10, atk=20, defense=0, type="Machine", pattern=dummy_pattern),
-        ]
+        # Sort by name for consistent order (optional but nice)
+        monsters_data.sort(key=lambda m: m.name)
         
         start_x = -0.35
         spacing = 0.20

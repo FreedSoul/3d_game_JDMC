@@ -1,0 +1,12 @@
+{
+    "name": "Iron Sentinel",
+    "level": 3,
+    "hp": 25,
+    "atk": 25,
+    "defense": 60,
+    "type": "Machine",
+    "description": "An automated guardian that never sleeps.",
+    "texture_path": "../assets/cards/iron_sentinel_3.png",
+    "effects": [],
+    "pattern": "RECT_2X3"
+}

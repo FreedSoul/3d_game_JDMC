@@ -1,0 +1,12 @@
+{
+    "name": "Ember Whelp",
+    "level": 1,
+    "hp": 10,
+    "atk": 40,
+    "defense": 10,
+    "type": "Dragon",
+    "description": "A small dragon with scales not yet fully hardened.",
+    "texture_path": "../assets/cards/ember_whelp_1.png",
+    "effects": [],
+    "pattern": "RECT_2X3"
+}

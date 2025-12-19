@@ -1,0 +1,14 @@
+{
+    "name": "Crystal Golem",
+    "level": 2,
+    "hp": 8,
+    "atk": 30,
+    "defense": 80,
+    "type": "Rock",
+    "description": "A construct of raw crystal, deflecting attacks and regenerating.",
+    "texture_path": "../assets/cards/crystal_golem_2.png",
+    "effects": [
+        "E002_HEAL_SELF"
+    ],
+    "pattern": "RECT_2X3"
+}

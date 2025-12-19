@@ -1,0 +1,14 @@
+{
+    "name": "Crystal Guardian",
+    "level": 2,
+    "hp": 12,
+    "atk": 25,
+    "defense": 70,
+    "type": "Rock",
+    "description": "A variant of the golem tasked with defending sacred grounds.",
+    "texture_path": "../assets/cards/crystal_golem_2.png",
+    "effects": [
+        "E002_HEAL_SELF"
+    ],
+    "pattern": "RECT_2X3"
+}
