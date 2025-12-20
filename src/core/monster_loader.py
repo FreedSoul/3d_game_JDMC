@@ -39,7 +39,9 @@ class MonsterLoader:
         texture_path = data.get("texture_path")
         if not texture_path and "texture" in data:
              texture_path = f"assets/cards/{data['texture']}"
-             
+
+        miniature_path = data.get("miniature_path")
+        
         return Monster(
             name=data.get("name", "Unknown"),
             level=data.get("level", 1),
@@ -49,6 +51,7 @@ class MonsterLoader:
             type=data.get("type", "Normal"),
             description=data.get("description", ""),
             texture_path=texture_path,
+            miniature_path=miniature_path,
             pattern=pattern,
             effects=data.get("effects", [])
         )

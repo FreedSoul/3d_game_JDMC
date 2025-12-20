@@ -45,23 +45,30 @@ class MonsterCard(Entity):
         # If the image is just the *art*, we need the frame.
         # User said "assets/cards/crystal_golem_1.png". Let's assume it replaces the background.
         
-        # Name
-        Text(parent=self, text=monster.name, position=(0, 0.45), origin=(0, 0), scale=4, color=color.gold)
-        
-        # Stats Block
-        stats_text = f"LVL: {monster.level}\nHP: {monster.hp}\nATK: {monster.atk}\nDEF: {monster.defense}\nTYPE: {monster.type}"
-        Text(parent=self, text=stats_text, position=(-0.45, 0.2), origin=(-0.5, 0.5), scale=3)
-        
-        # Description (Combine flavor text + Effects)
-        full_desc = monster.description
-        if monster.effects:
-            effect_obj = get_effect(monster.effects[0])
-            if effect_obj:
-                full_desc += f"\n[{effect_obj.description}]"
-        
-        # Note: Removing wordwrap to avoid Ursina Text error for now. 
-        # Manually breaking lines or relying on simple display.
-        Text(parent=self, text=full_desc, position=(0, -0.3), origin=(0, 0), scale=0.8, color=color.light_gray)
+        # Helper to check if we should show debug text
+        # User requested to hide text overlap if texture is present
+        show_debug_text = False
+        if not monster.texture_path or "white_cube" in monster.texture_path:
+            show_debug_text = True
+            
+        if show_debug_text:
+            # Name
+            Text(parent=self, text=monster.name, position=(0, 0.45), origin=(0, 0), scale=4, color=color.gold)
+            
+            # Stats Block
+            stats_text = f"LVL: {monster.level}\nHP: {monster.hp}\nATK: {monster.atk}\nDEF: {monster.defense}\nTYPE: {monster.type}"
+            Text(parent=self, text=stats_text, position=(-0.45, 0.2), origin=(-0.5, 0.5), scale=3)
+            
+            # Description (Combine flavor text + Effects)
+            full_desc = monster.description
+            if monster.effects:
+                effect_obj = get_effect(monster.effects[0])
+                if effect_obj:
+                    full_desc += f"\n[{effect_obj.description}]"
+            
+            # Note: Removing wordwrap to avoid Ursina Text error for now. 
+            # Manually breaking lines or relying on simple display.
+            Text(parent=self, text=full_desc, position=(0, -0.3), origin=(0, 0), scale=0.8, color=color.light_gray)
 
     def request_summon(self):
         print(f"Summon Requested for {self.monster.name} at {self.position}")

@@ -7,6 +7,7 @@
     "type": "Dragon",
     "description": "A small dragon with scales not yet fully hardened.",
     "texture_path": "../assets/cards/ember_whelp_1.png",
+    "miniature_path": "../assets/miniatures/ember_whelp_1-removebg.png",
     "effects": [],
     "pattern": "RECT_2X3"
 }

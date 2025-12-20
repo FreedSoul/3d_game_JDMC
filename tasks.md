@@ -38,6 +38,7 @@
 - [x] **Task 6.1:** Refactor HUD: Replace Summon Button with Card Hover Options.
     - [x] **Polish:** Replaced "Roll Dice" text with custom PNG icon.
 - [x] **Task 6.2:** Create `MonsterCard` Component: Visuals & Interactions (Hover/Click).
+    - [x] **Polish:** Hide stats/text overlay on textured cards (Debug View).
 - [x] **Task 6.3:** Implement Hand View: Display 5 Monster Cards.
 - [x] **Task 6.4:** Implement Effects System (`src/core/effects.py`).
 - [x] **Task 6.5:** Load Crystal Golem data and texture using relative paths.

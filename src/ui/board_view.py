@@ -50,7 +50,13 @@ class BoardView(Entity):
             )
             
             # Spawn a placeholder monster for testing immediately after placing!
-            self.engine.summon_monster(self.engine.current_player_id, "TestMonster", origin_x, origin_y)
+            self.engine.summon_monster(
+                self.engine.current_player_id, 
+                self.pending_monster.name if self.pending_monster else "TestMonster", 
+                origin_x, 
+                origin_y,
+                monster_obj=self.pending_monster
+            )
             
             # Finish placement
             self.construction_mode = False
@@ -307,14 +313,45 @@ class BoardView(Entity):
                         visual_cell.piece = None
                         
                     if cell_data.monster_id:
+                        # Determine model/texture
+                        miniature_tex = None
+                        if cell_data.monster_ref and cell_data.monster_ref.miniature_path:
+                             miniature_tex = cell_data.monster_ref.miniature_path
+                             
                         if not visual_cell.piece:
-                            visual_cell.piece = Entity(parent=visual_cell, model='sphere', color=color.white, scale=0.5, position=(0,0,-0.5))
+                            if miniature_tex:
+                                # Render as Billboard Quad
+                                visual_cell.piece = Entity(
+                                    parent=visual_cell, 
+                                    model='quad', 
+                                    texture=miniature_tex,
+                                    scale=1.3, 
+                                    position=(0, 0.65, 0), # Lift up more
+                                    billboard=True,
+                                    double_sided=True,
+                                    transparent=True # Ensure transparency support
+                                )
+                            else:
+                                # Default Sphere
+                                visual_cell.piece = Entity(
+                                    parent=visual_cell, 
+                                    model='sphere', 
+                                    color=color.white, 
+                                    scale=0.5, 
+                                    position=(0,0,-0.5)
+                                )
                         
-                        # Color piece by owner
-                        if cell_data.monster_owner_id == 1:
-                            visual_cell.piece.color = color.pink
+                        # Color piece by owner IF it's the default sphere
+                        # If it's a miniature, probably keep original colors or tint slightly?
+                        # User wants the miniature "that marches with the card name". 
+                        # Let's assume miniature has its own colors. 
+                        if not miniature_tex:
+                            if cell_data.monster_owner_id == 1:
+                                visual_cell.piece.color = color.pink
+                            else:
+                                visual_cell.piece.color = color.cyan
                         else:
-                            visual_cell.piece.color = color.cyan
+                            visual_cell.piece.color = color.white # Reset tint for texture
                     else:
                         if visual_cell.piece:
                             destroy(visual_cell.piece)

@@ -7,6 +7,7 @@
     "type": "Rock",
     "description": "A construct of raw crystal, deflecting attacks and regenerating.",
     "texture_path": "../assets/cards/crystal_golem_2.png",
+    "miniature_path": "../assets/miniatures/crystal_golem_2-removebg.png",
     "effects": [
         "E002_HEAL_SELF"
     ],

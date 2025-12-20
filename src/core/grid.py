@@ -8,6 +8,7 @@ class Cell:
         self.y = y
         self.owner_id: Optional[int] = None
         self.monster_id: Optional[str] = None # ID of the monster occupying this cell
+        self.monster_ref = None # Reference to Monster object
         self.monster_owner_id: Optional[int] = None # Player ID who owns the monster
         self.is_dungeon_master: bool = False
 
@@ -159,6 +160,8 @@ class Grid:
         if source and dest:
             dest.monster_id = source.monster_id
             dest.monster_owner_id = source.monster_owner_id
+            dest.monster_ref = source.monster_ref
             
             source.monster_id = None
             source.monster_owner_id = None
+            source.monster_ref = None

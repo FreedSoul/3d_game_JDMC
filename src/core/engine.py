@@ -83,7 +83,7 @@ class GameEngine:
         return False
 
 
-    def summon_monster(self, player_id: int, monster_id: str, x: int, y: int):
+    def summon_monster(self, player_id: int, monster_id: str, x: int, y: int, monster_obj=None):
         """
         Spawns a monster at x,y. For MVP testing.
         """
@@ -91,6 +91,7 @@ class GameEngine:
         if cell:
             cell.monster_id = monster_id
             cell.monster_owner_id = player_id
+            cell.monster_ref = monster_obj
 
     def execute_move(self, from_x: int, from_y: int, to_x: int, to_y: int) -> bool:
         player = self.get_current_player()

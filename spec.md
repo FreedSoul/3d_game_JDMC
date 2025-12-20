@@ -45,7 +45,7 @@ Construir una versión jugable de escritorio de "Dungeon Dice Monsters" donde do
     - "Roll Dice" and "Summon" buttons stacked vertically bottom-left.
     - "End Turn" button bottom-right.
     - **Monster Cards**: Row of 5 clickable cards at bottom-center.
-        - **Visuals**: Background Texture (Art), Name, Level, Type, HP, Attack, Defense, Description (Flavor + Effect).
+        - **Visuals**: Background Texture (Art). Text metadata (Name, Stats) is overlayed ONLY if no texture is present (Debug Feature).
         - **Data**: Loaded from `Monster` dataclass, supporting relative texture paths and effect IDs.
         - **Interaction**: Click to select monster for summoning.
 - **Crest Counter**: Displays current crest resources.

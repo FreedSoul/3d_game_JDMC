@@ -117,6 +117,7 @@ Usaremos `pydantic` o `dataclasses` estándar.
     - Update `Monster` dataclass with `effects` list, `type`, `description`, `texture_path` fields.
 3. **MonsterCard Component**:
     - Visual representation with Stats, Type, Description, and Texture support.
+    - **Visualization Logic**: Stats/Text are hidden if a valid texture is present; shown otherwise (Debug Mode).
 4. **Hand View**:
     - Display 5 cards at the bottom center.
     - Click interaction to select for summoning.

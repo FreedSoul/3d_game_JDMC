@@ -29,6 +29,7 @@ class Monster(BaseModel):
     type: str = "Warrior" # Default type
     description: str = ""
     texture_path: Optional[str] = None
+    miniature_path: Optional[str] = None
     
     class Config:
         populate_by_name = True

@@ -7,6 +7,7 @@
     "type": "Machine",
     "description": "An automated guardian that never sleeps.",
     "texture_path": "../assets/cards/iron_sentinel_3.png",
+    "miniature_path": "../assets/miniatures/mini_015_iron_sentinel-removebg.png",
     "effects": [],
     "pattern": "RECT_2X3"
 }
