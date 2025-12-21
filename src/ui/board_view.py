@@ -32,6 +32,47 @@ class BoardView(Entity):
 
     # ... (create_grid, input, update remain same) ...
 
+    def show_context_menu(self, monster, ui_pos, grid_x, grid_y):
+        from src.ui.monster_context_menu import MonsterContextMenu
+        self.context_menu_ref = MonsterContextMenu(
+            monster,
+            position=ui_pos, 
+            on_move_click=lambda: self.on_menu_move(grid_x, grid_y),
+            on_stats_click=lambda: self.on_menu_stats(monster),
+            on_cancel_click=self.close_context_menu
+        )
+        self.current_menu_grid_pos = (grid_x, grid_y)
+
+    def close_context_menu(self):
+        if hasattr(self, 'context_menu_ref') and self.context_menu_ref:
+            destroy(self.context_menu_ref)
+            self.context_menu_ref = None
+
+    def on_menu_move(self, x, y):
+        self.close_context_menu()
+        print(f"Menu: Move Selected for {x}, {y}")
+        
+        # Trigger the old 'Select Unit' logic
+        self.selected_monster_pos = (x, y)
+        current_player = self.engine.get_current_player()
+        
+        # Highlight valid moves
+        from src.core.dataclasses import DieFace
+        move_power = current_player.crests.get(DieFace.MOVEMENT, 0)
+        
+        self.valid_moves = self.engine.grid.get_valid_moves(x, y, move_power, current_player.player_id)
+        self.highlight_valid_moves()
+
+    def on_menu_stats(self, monster):
+        self.close_context_menu()
+        from src.ui.monster_detail_panel import MonsterDetailPanel
+        self.detail_panel_ref = MonsterDetailPanel(monster, on_close_click=self.close_detail_panel)
+
+    def close_detail_panel(self):
+         if hasattr(self, 'detail_panel_ref') and self.detail_panel_ref:
+            destroy(self.detail_panel_ref)
+            self.detail_panel_ref = None
+
     def try_place(self, origin_x, origin_y):
         if self.engine.grid.validate_dimension(
             self.engine.current_player_id, 
@@ -83,23 +124,21 @@ class BoardView(Entity):
     def on_cell_click(self, x, y):
         print(f"Clicked cell: {x}, {y}")
         
+        # Close any existing cursors/menus
+        self.close_context_menu()
+        self.close_detail_panel()
+        
         # Movement / Selection Logic
         cell_data = self.engine.grid.get_cell(x, y)
         current_player = self.engine.get_current_player()
         print(f"DEBUG: Checking Selection... Cell Owner: {cell_data.monster_owner_id}, Current Player: {current_player.player_id}")
         
-        # 1. Select Unit (Own Monster)
+        # 1. Select Unit (Own Monster) -> SHOW MENU
         if cell_data and cell_data.monster_id and cell_data.monster_owner_id == current_player.player_id:
-            print(f"Selected Monster at {x}, {y}")
-            self.selected_monster_pos = (x, y)
-            
-            # Highlight valid moves
-            from src.core.dataclasses import DieFace
-            move_power = current_player.crests.get(DieFace.MOVEMENT, 0)
-            
-            self.valid_moves = self.engine.grid.get_valid_moves(x, y, move_power, current_player.player_id)
-            print(f"Valid Moves: {self.valid_moves}")
-            self.highlight_valid_moves()
+            print(f"Opening Menu for Monster at {x}, {y}")
+            # Calculate screen position for menu (approximation or use mouse.position)
+            # mouse.position is (x, y) in UI space (-0.5 to 0.5 usually)
+            self.show_context_menu(cell_data.monster_ref, mouse.position, x, y)
             return
 
         # 2. Action (Move or Attack)
@@ -326,7 +365,7 @@ class BoardView(Entity):
                                     model='quad', 
                                     texture=miniature_tex,
                                     scale=1.3, 
-                                    position=(0, 0.65, 0), # Lift up more
+                                    position=(0, 0, -0.65), # Lift up centered on tile (World Y)
                                     billboard=True,
                                     double_sided=True,
                                     transparent=True # Ensure transparency support

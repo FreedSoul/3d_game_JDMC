@@ -86,13 +86,31 @@ def main():
             camera.rotation = (52, 180, 0)
 
     def on_end_turn():
-        engine.next_turn()
+        engine.end_turn() # Resets to ROLL
+        
+        # Reset UI for new turn
+        hud.update_phase_state(engine.current_phase)
+        hud.roll_button.disabled = False # Re-enable roll if it was disabled?
+        
         update_camera()
         crest_counter.update_stats()
+        
+        # Refresh Hand for the new player
+        hand_view.refresh_hand(engine.get_current_player())
+        
         print(f"Turn Ended. Now Player {engine.current_player_id}")
+        hud.show_turn_notification(engine.current_player_id)
+
+    def on_next_phase():
+        new_phase = engine.next_phase()
+        hud.update_phase_state(new_phase)
+        
+        # Optional: Disable Roll button if not ROLL phase
+        # if new_phase != Phase.ROLL:
+        #    hud.roll_button.disabled = True
 
     # Initialize HUD with all callbacks
-    hud = HUD(engine, on_roll, on_pattern_selected, on_end_turn)
+    hud = HUD(engine, on_roll, on_pattern_selected, on_end_turn, on_next_phase)
     
     # Initialize Hand View (After HUD to access its methods)
     from src.ui.hand_view import HandView

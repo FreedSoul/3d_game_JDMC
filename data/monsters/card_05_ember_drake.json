@@ -1,13 +1,23 @@
 {
+    "id": "card_05_ember_drake",
     "name": "Ember Drake",
-    "level": 2,
-    "hp": 15,
-    "atk": 50,
-    "defense": 15,
     "type": "Dragon",
-    "description": "A matured whelp with hotter flames.",
-    "texture_path": "../assets/cards/ember_whelp_1.png",
-    "miniature_path": "../assets/miniatures/ember_whelp_1-removebg.png",
-    "effects": [],
-    "pattern": "RECT_2X3"
+    "level": 2,
+    "stats": {
+        "hp": 15,
+        "atk": 50,
+        "def": 15
+    },
+    "mechanics": {
+        "effects": []
+    },
+    "assets": {
+        "card_full_art": "cards/ember_whelp_1.png",
+        "token_sprite": "miniatures/ember_whelp_1-removebg.png"
+    },
+    "metadata": {
+        "description": "A matured whelp with hotter flames.",
+        "pattern": "RECT_2X3",
+        "version": "1.0_Migrated"
+    }
 }

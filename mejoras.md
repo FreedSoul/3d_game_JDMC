@@ -1,0 +1,1 @@
+revisar bien los json de los monstruos, parece que no esta como debe ser

@@ -8,7 +8,10 @@ class HandView(Entity):
         self.engine = engine
         self.cards = []
         self.on_summon_click = on_summon_click
-        self.create_test_hand()
+        
+        # Initial Draw if engine ready
+        if self.engine:
+            self.refresh_hand(self.engine.get_current_player())
         
     def update(self):
         if self.engine:
@@ -20,27 +23,32 @@ class HandView(Entity):
                 for c in self.cards:
                     c.set_summonable(can_summon)
 
-    def create_test_hand(self):
-        from src.core.monster_loader import MonsterLoader
-        # Load monsters from data directory
-        monsters_data = MonsterLoader.load_monsters("data/monsters")
+    def refresh_hand(self, player_state):
+        # 1. Clear existing
+        for c in self.cards:
+            destroy(c)
+        self.cards.clear()
         
-        # Sort by name for consistent order (optional but nice)
-        monsters_data.sort(key=lambda m: m.name)
+        # 2. Re-create for current player
+        # Sort by name for consistent order
+        hand_list = sorted(player_state.hand, key=lambda m: m.name)
         
         start_x = -0.35
         spacing = 0.20
         
-        for i, m in enumerate(monsters_data):
+        print(f"Refeshing Hand for Player {player_state.player_id}. Count: {len(hand_list)}")
+        
+        for i, m in enumerate(hand_list):
             c = MonsterCard(
                 monster=m, 
-                position=(start_x + (i * spacing), -0.38), # Bottom Row
+                position=(start_x + (i * spacing), -1.5), # Start off-screen
                 scale=(0.15, 0.22), # Slightly smaller for hand
                 on_click=self.on_card_click,
                 on_summon_request=self.on_summon_click
             )
+            c.animate_position((start_x + (i * spacing), -0.38), duration=0.5, delay=i*0.1)
             self.cards.append(c)
-            
+
     def on_card_click(self, monster):
         print(f"Card Clicked: {monster.name}")
         from src.ui.card_detail_modal import CardDetailModal
@@ -48,6 +56,13 @@ class HandView(Entity):
 
     def remove_card(self, monster):
         print(f"Removing card for: {monster.name}")
+        
+        # Also remove from Data Model
+        if self.engine:
+            player = self.engine.get_current_player()
+            if monster in player.hand:
+                player.hand.remove(monster)
+        
         card_to_remove = None
         for card in self.cards:
             if card.monster == monster:

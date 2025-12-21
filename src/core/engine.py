@@ -2,6 +2,7 @@ from typing import Dict
 import random
 from src.core.grid import Grid
 from src.core.dataclasses import PlayerState, DieFace
+from src.core.constants import Phase
 
 class GameEngine:
     def __init__(self):
@@ -10,8 +11,34 @@ class GameEngine:
             1: PlayerState(player_id=1),
             2: PlayerState(player_id=2)
         }
+        
+        # Load and Distribute Monsters
+        from src.core.monster_loader import MonsterLoader
+        all_monsters = MonsterLoader.load_monsters("data/monsters")
+        
+        # Simple split: Evens to P1, Odds to P2 (or split half/half)
+        # We need to make copies if we want independent instances, 
+        # but for now shared reference (read-only stats) is fine, 
+        # BUT 'hand' is a list on PlayerState, so that is distinct.
+        # Wait - if we modify the Monster object (e.g. current HP), we need deep copies.
+        # Currently Monster is a Pydantic model. 
+        # Let's just distribute references for now, assuming base stats don't execute logic on the card instance itself 
+        # (logic should be on the board instance).
+        
+        # Split logic:
+        mid_idx = len(all_monsters) // 2
+        # P1 gets first half, P2 gets second half
+        # To ensure fair distribution of types, maybe alternating?
+        
+        for i, monster in enumerate(all_monsters):
+            if i % 2 == 0:
+                self.players[1].hand.append(monster)
+            else:
+                self.players[2].hand.append(monster)
+        
         self.current_player_id = 1
         self.turn_count = 1
+        self.current_phase = Phase.ROLL
         
         # Initialize Dungeon Masters (simplified for now)
         # Player 1 DM at (6, 0) - Bottom center
@@ -22,10 +49,31 @@ class GameEngine:
         self.grid.set_owner(6, 18, 2)
         self.grid.get_cell(6, 18).is_dungeon_master = True
 
-    def next_turn(self):
+    def next_phase(self):
+        """Cycles through phases: ROLL -> MAIN -> ATTACK -> ADJUST -> END"""
+        if self.current_phase == Phase.ROLL:
+            self.current_phase = Phase.MAIN
+        elif self.current_phase == Phase.MAIN:
+            self.current_phase = Phase.ATTACK
+        elif self.current_phase == Phase.ATTACK:
+            self.current_phase = Phase.ADJUST
+        elif self.current_phase == Phase.ADJUST:
+             # Typically next is END, enabling 'End Turn' button
+             # Or we can auto-end? User says "until the last phase, the button end turn will be activated"
+             # So 'next phase' from ADJUST leads to a state where End Turn is active.
+             # Let's say the phase *is* END, and in END phase, End Turn button works.
+             self.current_phase = Phase.END
+
+        print(f"Phase Changed to: {self.current_phase.value}")
+        return self.current_phase
+
+    def end_turn(self):
+        """Ends the turn and passes to next player, resetting phase."""
         self.current_player_id = 2 if self.current_player_id == 1 else 1
+        self.current_phase = Phase.ROLL # Reset to Roll
         if self.current_player_id == 1:
             self.turn_count += 1
+        print(f"Turn Ended. Now Player {self.current_player_id} - {self.current_phase.value}")
 
     def add_crests(self, player_id: int, crests: Dict[DieFace, int]):
         player = self.players.get(player_id)
@@ -127,22 +175,52 @@ class GameEngine:
             return False, "Target out of range"
 
         # Cost Check
-        player = self.players.get(attacker_cell.monster_owner_id)
-        # Cost Check & Deduction using centralized method
-        if not self.remove_crests(player.player_id, {DieFace.ATTACK: 1}):
+        attacker_player = self.players.get(attacker_cell.monster_owner_id)
+        if not self.remove_crests(attacker_player.player_id, {DieFace.ATTACK: 1}):
             return False, "Not enough Attack Crests"
+
+        # Stats
+        attacker = attacker_cell.monster_ref
+        target = target_cell.monster_ref
         
-        # Calculate Damage (MVP: Fixed 10)
-        damage = 10 
+        atk_power = attacker.atk
+        def_power = target.defense
+        hp_power = target.hp
         
-        # Log Logic
-        attacker_name = f"{attacker_cell.monster_id} (P{attacker_cell.monster_owner_id})"
-        target_name = f"{target_cell.monster_id} (P{target_cell.monster_owner_id})"
+        # Defense Policy: Auto-Spend if available
+        defender_player = self.players.get(target_cell.monster_owner_id)
+        defense_bonus = 0
+        spent_defense = False
         
-        # Action Effect
-        target_cell.monster_id = None
-        target_cell.monster_owner_id = None
+        if defender_player and defender_player.crests.get(DieFace.DEFENSE, 0) > 0:
+            self.remove_crests(defender_player.player_id, {DieFace.DEFENSE: 1})
+            defense_bonus = def_power
+            spent_defense = True
+            
+        # Calculation
+        resistance = hp_power + defense_bonus
+        impact = atk_power - resistance
         
-        msg = f"{attacker_name} attacked {target_name} for {damage} dmg! Target destroyed!"
-        print(msg)
-        return True, msg
+        attacker_name = f"{attacker.name} (P{attacker_cell.monster_owner_id})"
+        target_name = f"{target.name} (P{target_cell.monster_owner_id})"
+        
+        print(f"BATTLE: {attacker_name} [ATK {atk_power}] vs {target_name} [HP {hp_power} + DEF {defense_bonus if spent_defense else 0}]")
+        print(f"Impact: {atk_power} - {resistance} = {impact}")
+
+        if impact >= 0:
+            # Destroy Target
+            msg = f"{attacker_name} destroyed {target_name}! (Impact: {impact})"
+            target_cell.monster_id = None
+            target_cell.monster_owner_id = None
+            target_cell.monster_ref = None
+            
+            # Remove from defender hand if it was mostly tracking via grid, 
+            # but PlayerState.hand only tracked *unsummoned* cards mostly.
+            # If we tracked summoned monsters in a list, we'd remove it there too.
+            print(msg)
+            return True, msg
+        else:
+            # Attack Failed
+            msg = f"{attacker_name} failed to damage {target_name}. (Impact: {impact})"
+            print(msg)
+            return True, msg

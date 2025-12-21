@@ -1,15 +1,25 @@
 {
+    "id": "card_01_crystal_golem",
     "name": "Crystal Golem",
-    "level": 2,
-    "hp": 8,
-    "atk": 30,
-    "defense": 80,
     "type": "Rock",
-    "description": "A construct of raw crystal, deflecting attacks and regenerating.",
-    "texture_path": "../assets/cards/crystal_golem_2.png",
-    "miniature_path": "../assets/miniatures/crystal_golem_2-removebg.png",
-    "effects": [
-        "E002_HEAL_SELF"
-    ],
-    "pattern": "RECT_2X3"
+    "level": 2,
+    "stats": {
+        "hp": 8,
+        "atk": 30,
+        "def": 80
+    },
+    "mechanics": {
+        "effects": [
+            "E002_HEAL_SELF"
+        ]
+    },
+    "assets": {
+        "card_full_art": "cards/crystal_golem_2.png",
+        "token_sprite": "miniatures/crystal_golem_2-removebg.png"
+    },
+    "metadata": {
+        "description": "A construct of raw crystal, deflecting attacks and regenerating.",
+        "pattern": "RECT_2X3",
+        "version": "1.0_Migrated"
+    }
 }

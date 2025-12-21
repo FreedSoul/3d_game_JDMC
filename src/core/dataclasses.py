@@ -45,4 +45,5 @@ class PlayerState(BaseModel):
         DieFace.MAGIC: 0,
         DieFace.TRAP: 0
     }
-    # List of owned monster IDs or references could go here
+    hand: List[Monster] = []
+    dice_pool: List[dict] = [] # Placeholder for future dice logic

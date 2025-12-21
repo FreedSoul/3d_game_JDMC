@@ -1,15 +1,25 @@
 {
+    "id": "card_04_crystal_guardian",
     "name": "Crystal Guardian",
-    "level": 2,
-    "hp": 12,
-    "atk": 25,
-    "defense": 70,
     "type": "Rock",
-    "description": "A variant of the golem tasked with defending sacred grounds.",
-    "texture_path": "../assets/cards/crystal_golem_2.png",
-    "miniature_path": "../assets/miniatures/crystal_golem_2-removebg.png",
-    "effects": [
-        "E002_HEAL_SELF"
-    ],
-    "pattern": "RECT_2X3"
+    "level": 2,
+    "stats": {
+        "hp": 12,
+        "atk": 25,
+        "def": 70
+    },
+    "mechanics": {
+        "effects": [
+            "E002_HEAL_SELF"
+        ]
+    },
+    "assets": {
+        "card_full_art": "cards/crystal_golem_2.png",
+        "token_sprite": "miniatures/crystal_golem_2-removebg.png"
+    },
+    "metadata": {
+        "description": "A variant of the golem tasked with defending sacred grounds.",
+        "pattern": "RECT_2X3",
+        "version": "1.0_Migrated"
+    }
 }

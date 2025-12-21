@@ -1,13 +1,23 @@
 {
+    "id": "card_02_ember_whelp",
     "name": "Ember Whelp",
-    "level": 1,
-    "hp": 10,
-    "atk": 40,
-    "defense": 10,
     "type": "Dragon",
-    "description": "A small dragon with scales not yet fully hardened.",
-    "texture_path": "../assets/cards/ember_whelp_1.png",
-    "miniature_path": "../assets/miniatures/ember_whelp_1-removebg.png",
-    "effects": [],
-    "pattern": "RECT_2X3"
+    "level": 1,
+    "stats": {
+        "hp": 10,
+        "atk": 40,
+        "def": 10
+    },
+    "mechanics": {
+        "effects": []
+    },
+    "assets": {
+        "card_full_art": "cards/ember_whelp_1.png",
+        "token_sprite": "miniatures/ember_whelp_1-removebg.png"
+    },
+    "metadata": {
+        "description": "A small dragon with scales not yet fully hardened.",
+        "pattern": "RECT_2X3",
+        "version": "1.0_Migrated"
+    }
 }

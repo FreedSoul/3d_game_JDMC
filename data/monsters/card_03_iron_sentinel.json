@@ -1,13 +1,23 @@
 {
+    "id": "card_03_iron_sentinel",
     "name": "Iron Sentinel",
-    "level": 3,
-    "hp": 25,
-    "atk": 25,
-    "defense": 60,
     "type": "Machine",
-    "description": "An automated guardian that never sleeps.",
-    "texture_path": "../assets/cards/iron_sentinel_3.png",
-    "miniature_path": "../assets/miniatures/mini_015_iron_sentinel-removebg.png",
-    "effects": [],
-    "pattern": "RECT_2X3"
+    "level": 3,
+    "stats": {
+        "hp": 25,
+        "atk": 25,
+        "def": 60
+    },
+    "mechanics": {
+        "effects": []
+    },
+    "assets": {
+        "card_full_art": "cards/iron_sentinel_3.png",
+        "token_sprite": "miniatures/mini_015_iron_sentinel-removebg.png"
+    },
+    "metadata": {
+        "description": "An automated guardian that never sleeps.",
+        "pattern": "RECT_2X3",
+        "version": "1.0_Migrated"
+    }
 }
